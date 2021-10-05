@@ -1,6 +1,6 @@
 // Roman Storm Multi Sender
 // To Use this Dapp: https://rstormsf.github.io/multisender
-pragma solidity 0.4.23;
+pragma solidity >=0.4.23;
 
 import "./Ownable.sol";
 import "../EternalStorage.sol";
@@ -28,7 +28,7 @@ contract Claimable is EternalStorage, Ownable {
     * @dev Allows the current owner to set the pendingOwner address.
     * @param newOwner The address to transfer ownership to.
     */
-    function transferOwnership(address newOwner) public onlyOwner {
+    function transferOwnership(address newOwner) public override onlyOwner {
         require(newOwner != address(0));
         addressStorage[keccak256("pendingOwner")] = newOwner;
     }

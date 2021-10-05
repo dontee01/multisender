@@ -1,6 +1,6 @@
 // Roman Storm Multi Sender
 // To Use this Dapp: https://rstormsf.github.io/multisender
-pragma solidity 0.4.23;
+pragma solidity >=0.4.23;
 
 
 /**
@@ -18,7 +18,7 @@ contract UpgradeabilityStorage {
     * @dev Tells the version name of the current implementation
     * @return string representing the name of the current version
     */
-    function version() public view returns (string) {
+    function version() public view returns (string memory) {
         return _version;
     }
 
