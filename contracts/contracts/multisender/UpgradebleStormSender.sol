@@ -1,6 +1,6 @@
 // Roman Storm Multi Sender
 // To Use this Dapp: https://rstormsf.github.io/multisender
-pragma solidity 0.4.23;
+pragma solidity >=0.4.23;
 
 import "../OwnedUpgradeabilityStorage.sol";
 import "./Claimable.sol";
@@ -40,14 +40,18 @@ contract UpgradebleStormSender is OwnedUpgradeabilityStorage, Claimable {
         _;
     }
 
-    function() public payable {}
+// ////// track address to be excluded from fee
+    address[] public excludedFromFee;
+    mapping(address => bool) public isExcludedFromFee;
+
+    fallback() public payable {}
 
     function initialize(address _owner) public {
         require(!initialized());
         setOwner(_owner);
         setArrayLimit(200);
         setDiscountStep(0.00005 ether);
-        setFee(0.05 ether);
+        setFee(0.01 ether);
         boolStorage[keccak256("rs_multisender_initialized")] = true;
     }
 
@@ -118,10 +122,16 @@ contract UpgradebleStormSender is OwnedUpgradeabilityStorage, Claimable {
 
     function multisendEther(address[] _contributors, uint256[] _balances) public payable {
         uint256 total = msg.value;
-        uint256 fee = currentFee(msg.sender);
-        require(total >= fee);
+        // uint256 fee = currentFee(msg.sender);
+        uint256 fee = fee();
+        if (!isExcludedFromFee[msg.sender])
+        {
+            require(total >= fee);
+            total = total.sub(fee);
+        }
+        // require(total >= fee);
         require(_contributors.length <= arrayLimit());
-        total = total.sub(fee);
+        // total = total.sub(fee);
         uint256 i = 0;
         for (i; i < _contributors.length; i++) {
             require(total >= _balances[i]);
@@ -145,6 +155,12 @@ contract UpgradebleStormSender is OwnedUpgradeabilityStorage, Claimable {
     
     function setTxCount(address customer, uint256 _txCount) private {
         uintStorage[keccak256("txCount", customer)] = _txCount;
+    }
+
+    function excludeAddressFromFee(address _address) public onlyOwner {
+        require(!excludedFromFee[_address], "Address already excluded from fee");
+        excludedFromFee.push(_address);
+        isExcludedFromFee[_address] = true;
     }
 
 }
